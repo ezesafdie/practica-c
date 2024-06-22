@@ -1,26 +1,25 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-int stringLength(const char* string);
-
 int main()
 {
-    const char string[] = "Cadena de caracteres";
-           char *str = "hello world";
+    int size;
+    char *text = NULL;
 
-    stringLength(string);
+    printf("Enter the amount of characters the string will have:\n");
+    scanf("%d", &size);
 
-    printf("%d", stringLength(str));
+    text = (char *) malloc(size * sizeof(char));
+    if(!text)
+        return -1;
 
+    printf("Enter the string:\n");
+    scanf(" ");
+    gets(text);
+
+    printf("Lo ingresado fue: %s", text);
+
+    free(text);
     return 0;
 }
 
-int stringLength(const char* string)
-{
-    const char* lastAdress = string;
-
-    while(*lastAdress)
-        ++lastAdress; // Al final queda apuntando al caracter nulo "\0"
-
-    return lastAdress - string;
-}
