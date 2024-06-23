@@ -1,25 +1,32 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+typedef struct
+{
+    char name[50];
+    int hireDate;
+    float salary;
+} Employee;
+
 int main()
 {
-    int size;
-    char *text = NULL;
+   Employee employee = {"Juan", 20240622, 200.5};
+   Employee secondEmployee;
 
-    printf("Enter the amount of characters the string will have:\n");
-    scanf("%d", &size);
+   printf("Employee name: %s. Date: %d. Salary: %.2f", employee.name, employee.hireDate, employee.salary);
+   printf("\nEnter info for another employee\n");
+   printf("Name: ");
+   scanf(" ");
+   gets(secondEmployee.name);
+   printf("\nHire Date: ");
+   scanf("%d", &secondEmployee.hireDate);
+   printf("\nSalary: ");
+   scanf("%f", &secondEmployee.salary);
 
-    text = (char *) malloc(size * sizeof(char));
-    if(!text)
-        return -1;
 
-    printf("Enter the string:\n");
-    scanf(" ");
-    gets(text);
+   printf("Employee name: %s. Date: %d. Salary: %.2f", secondEmployee.name, secondEmployee.hireDate, secondEmployee.salary);
 
-    printf("Lo ingresado fue: %s", text);
 
-    free(text);
-    return 0;
+   return 0;
 }
 
