@@ -1,12 +1,1 @@
-HOLA
-COMO
-ESTAS
-ESTO
-ES
-\0
-UNA
-PRUEBA
-1246
-//OET
-\N
-\T
+sever la salrev eS

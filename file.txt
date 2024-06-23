@@ -1,12 +1,1 @@
-hola
-como
-estas
-esto
-es
-\0
-una
-prueba
-1246
-//oet
-\n
-\t
+Se verlas al reves

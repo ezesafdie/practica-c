@@ -5,10 +5,11 @@ int isLowerCase(char c);
 
 int main()
 {
+    int i;
     int c;
-    int count;
+    int count = 0;
 
-    FILE* file = fopen("file.txt", "r");
+    FILE* file = fopen("file.txt", "rb");
     FILE* fileToWrite = fopen("temp.txt", "w+");
 
     if(!file)
@@ -20,25 +21,18 @@ int main()
         return -1;
     }
 
-    while((c = fgetc(file)) != EOF)
+    fseek(file, -1, SEEK_END);
+
+    count = ftell(file);
+
+    while(i <= count)
     {
-        if(c == '\n')
-            count++;
+        c = fgetc(file);
+        fputc(c, fileToWrite);
+        fseek(file, -2, SEEK_CUR);
 
-        printf("%c", c);
-
-        if(isLowerCase(c))
-        {
-            fputc((int)c - 32, fileToWrite);
-        } else
-        {
-            fputc(c, fileToWrite);
-        }
+        i++;
     }
-
-    fclose(file);
-
-    printf("\n\nCantidad de lineas: %d", count + 1);
 
     return  0;
 }
