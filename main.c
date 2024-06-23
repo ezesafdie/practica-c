@@ -3,30 +3,51 @@
 
 typedef struct
 {
-    char name[50];
-    int hireDate;
-    float salary;
-} Employee;
+    char* itemName;
+    int quantity;
+    float price;
+    float amount;
+} Item;
+
+void readItem(Item* item);
+void printItem(Item* item);
 
 int main()
 {
-   Employee employee = {"Juan", 20240622, 200.5};
-   Employee secondEmployee;
+    Item* item = malloc(sizeof(Item));
+    if(!item)
+        return -1;
 
-   printf("Employee name: %s. Date: %d. Salary: %.2f", employee.name, employee.hireDate, employee.salary);
-   printf("\nEnter info for another employee\n");
-   printf("Name: ");
-   scanf(" ");
-   gets(secondEmployee.name);
-   printf("\nHire Date: ");
-   scanf("%d", &secondEmployee.hireDate);
-   printf("\nSalary: ");
-   scanf("%f", &secondEmployee.salary);
+    item->itemName = (char*) malloc(50 * sizeof(char));
+    if(!item->itemName)
+        return -1;
 
+    readItem(item);
 
-   printf("Employee name: %s. Date: %d. Salary: %.2f", secondEmployee.name, secondEmployee.hireDate, secondEmployee.salary);
+    printItem(item);
 
 
-   return 0;
+    free(item->itemName);
+    free(item);
+
+    return  0;
 }
 
+void readItem(Item* item)
+{
+    printf("Enter the item name: \n");
+    scanf("%s", item->itemName);
+
+    printf("\nEnter the quantity: \n");
+    scanf("%d", &item->quantity);
+
+    printf("\nEnter the price: \n");
+    scanf("%f", &item->price);
+
+    item->amount = item->price * item->quantity;
+}
+
+void printItem(Item* item)
+{
+    printf("Item: %s\nQuantity: %d\nPrice:%.2f\nAmount:%.2f", item->itemName, item->quantity, item->price, item->amount);
+}
