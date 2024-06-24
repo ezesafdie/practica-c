@@ -26,6 +26,12 @@ typedef struct
     int cantidad;
 } Movimiento;
 
+typedef struct
+{
+    char codigo[TAM_CODIGO];
+    int position;
+} IndexPos;
+
 int generarProductos(const char* nomArchProd);
 int generarMovimientos(const char* nomArchMov);
 void mostrarProductos(const char* nomArchProd);
@@ -34,6 +40,10 @@ void actualizarProductos(const char* nomArchProd, const char* nomArchMov);
 void guardarNuevoProducto(Movimiento* mov, FILE* temProdFile, FILE* movFile);
 void stringCopy(char* stringTo, char* stringFrom);
 int stringCompare(char* firstString, char* secondString);
+int createIndex(const char* nomArchProd);
+void actualizarProductosConIndice(const char* nomArchProd, const char* nomArchMov, const char* nomArchIndex);
+int generarMovimientosTest(const char* nomArchMov);
+
 
 int main()
 {
@@ -47,6 +57,8 @@ int main()
     printf("========================\n\n");
     actualizarProductos("test.tmp", "movimientos.tmp");
     mostrarProductos("test.tmp");
+
+    createIndex("test.tmp");
 
 
     char string1[10] = "Prueba1";
@@ -62,6 +74,13 @@ int main()
 
    // printf("\n\n%d", stricmp(string3, string4));
     printf("\n\n%d", stringCompare(string3, string4));
+
+    printf("\n========================\n\n");
+    generarMovimientosTest("movimientosTest.tmp");
+    mostrarMovimientos("movimientosTest.tmp");
+    printf("\n========================\n\n");
+    actualizarProductosConIndice("test.tmp", "movimientosTest.tmp", "index.tmp");
+    mostrarProductos("test.tmp");
 
 
     return 0;
@@ -106,6 +125,26 @@ int generarMovimientos(const char* nomArchMov)
 
     FILE* fileMovimientos = fopen(nomArchMov, "wb");
     fwrite(movimientos, sizeof(Movimiento), CANT_MOVS, fileMovimientos);
+
+    fclose(fileMovimientos);
+
+    return 1;
+}
+
+int generarMovimientosTest(const char* nomArchMov)
+{
+    Movimiento movimientos[CANT_MOVS - 3] = {
+        {"00", 10},
+        {"02", -10},
+        {"05", -3},
+        {"07", 10},
+        {"09", 03},
+        {"20", 6},
+        {"50", 100}
+    };
+
+    FILE* fileMovimientos = fopen(nomArchMov, "wb");
+    fwrite(movimientos, sizeof(Movimiento), CANT_MOVS - 3, fileMovimientos);
 
     fclose(fileMovimientos);
 
@@ -209,6 +248,91 @@ void guardarNuevoProducto(Movimiento* mov, FILE* temProdFile, FILE* movFile)
     }
 
     fwrite(&prod, sizeof(Producto), 1, temProdFile);
+}
+
+int createIndex(const char* nomArchProd)
+{
+    FILE* prods = fopen(nomArchProd, "rb");
+    if (!prods)
+        return -1;
+
+    FILE* index = fopen("index.tmp", "wb");
+    if(!index)
+        return -1;
+
+    IndexPos indexPos;
+    Producto producto;
+    fread(&producto, sizeof(Producto), 1, prods);
+    while(!feof(prods))
+    {
+        stringCopy(indexPos.codigo, producto.codigo);
+
+        int position = ftell(prods) - sizeof(Producto);
+        indexPos.position = position;
+
+        fwrite(&indexPos, sizeof(IndexPos), 1, index);
+        fread(&producto, sizeof(Producto), 1, prods);
+    }
+
+    fclose(prods);
+    fclose(index);
+
+    return 0;
+}
+
+
+void actualizarProductosConIndice(const char* nomArchProd, const char* nomArchMov, const char* nomArchIndex)
+{
+    FILE* prodFile = fopen(nomArchProd, "rb+");
+    FILE* movFile = fopen(nomArchMov, "rb");
+    FILE* indexFile = fopen(nomArchIndex, "rb");
+
+    //FILE* temProdFile = fopen("temProd.tmp", "wb");
+
+    // validar que se abrieron bien
+
+    Producto producto;
+    Movimiento movimiento;
+    IndexPos indexPos;
+    int comp;
+
+    //fread(&producto, sizeof(Producto), 1, prodFile);
+    fread(&movimiento, sizeof(Movimiento), 1, movFile);
+    fread(&indexPos, sizeof(IndexPos), 1, indexFile);
+
+    while(!feof(indexFile) && !feof(movFile))
+    {
+        comp = stringCompare(indexPos.codigo, movimiento.codigo);
+
+        if(comp == 0) // Se encontro el codigo del movimiento en el indice.
+        {
+            fseek(prodFile, indexPos.position, SEEK_SET);
+            fread(&producto, sizeof(Producto),  1, prodFile);
+
+            producto.stock += movimiento.cantidad;
+
+            fseek(prodFile, indexPos.position, SEEK_SET);
+            fwrite(&producto, sizeof(Producto), 1, prodFile);
+
+            fread(&movimiento, sizeof(Movimiento), 1, movFile); // una vez actualizada. Leemos lo siguiente asi pasamos al siguiente movimiento, pero manteniendo el mismo producto
+            fread(&indexPos, sizeof(IndexPos), 1, indexFile);
+        }
+
+        if(comp < 0)
+        {
+            fread(&indexPos, sizeof(IndexPos), 1, indexFile);
+        }
+
+
+
+    }
+    fclose(prodFile);
+    fclose(movFile);
+    //fclose(temProdFile);
+    fclose(indexFile);
+
+  //  remove(nomArchProd);
+   // rename("temProd.tmp", nomArchProd);
 }
 
 void stringCopy(char* stringDest, char* stringFrom)
